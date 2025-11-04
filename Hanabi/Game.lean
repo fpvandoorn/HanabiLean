@@ -1,17 +1,19 @@
-import Mathlib.Tactic
+import Mathlib.Data.Real.Basic
 
 /-! # General games -/
 
 /-- An incomplete-information asynchronous multiplayer game. -/
 structure Game : Type _ where
   Player : Type
-  /-- The state of a game. Should typically encode the full game history and any future randomness -/
+  /-- The state of a game.
+  Should typically encode the full game history and any future randomness. -/
   State : Type
   /-- The information state a player can have. -/
   Information : Type
   /-- Possible actions. -/
   Action : Type
-  /-- The possible set of starting states (currently assuming a uniform distribution on these, we could change that).  -/
+  /-- The possible set of starting states
+  * currently assuming a uniform distribution on these, we could change that. -/
   startingStates : Set State
   /-- The information of a player at a turn. -/
   info : State → Player → Information
@@ -22,7 +24,8 @@ structure Game : Type _ where
   /-- The allowed actions on a turn.
   * The valid actions can only depend on what the current player knows.
   * We encode the end of the game by making this the empty set.
-  * Currently we allow for situations where players might not know whether an action of another player is valid.
+  * Currently we allow for situations where players might not know
+    whether an action of another player is valid.
   -/
   valid : Information → Set Action
   /-- the state after an action. -/
@@ -50,7 +53,8 @@ def State.valid (S : G.State) : Set G.Action :=
 def State.IsGameEnd (S : G.State) : Prop :=
   S.valid = ∅
 
-/-- `P` is known to be true by a `p` at state `S` if it holds for every state compatible with the current information of player `p`. -/
+/-- `P` is known to be true by a `p` at state `S` if it holds
+for every state compatible with the current information of player `p`. -/
 def State.IsKnownBy (P : G.State → Prop) (S : G.State) (p : G.Player) : Prop :=
   ∀ S' ∈ (G.info · p) ⁻¹' {G.info S p}, P S'
 
@@ -65,8 +69,9 @@ def KnowGameEnd : Prop := ∀ (S : G.State) (p : G.Player), S.IsDecidableBy Stat
 /-- Every player knows whether it's their turn. -/
 def KnowCurrent : Prop := ∀ (S : G.State) (p : G.Player), S.IsDecidableBy (State.current · = p) p
 /-- Every player remembers the previous game state and knows the last action. -/
-def GoodKnowledge : Prop := ∀ ⦃S S' : G.State⦄ ⦃A A' : G.Action⦄ (p : G.Player) (_h : A ∈ S.valid) (_h' : A' ∈ S'.valid)
-    (_eq : (S.next A).info p = (S'.next A').info p), S.info p = S'.info p ∧ A = A'
+def GoodKnowledge : Prop :=
+  ∀ ⦃S S' : G.State⦄ ⦃A A' : G.Action⦄ (p : G.Player) (_h : A ∈ S.valid) (_h' : A' ∈ S'.valid)
+  (_eq : (S.next A).info p = (S'.next A').info p), S.info p = S'.info p ∧ A = A'
 
 /-- Exercise: given a game, define a new game where the last action taken is public information. -/
 def withAction (G : Game) : Game where
@@ -80,9 +85,9 @@ def withAction (G : Game) : Game where
   valid := sorry
   next := sorry
   score := sorry
-  __ := G
 
-/-- Exercise: given a game, define a new game where every player remembers their previous information. -/
+/-- Exercise: given a game,
+define a new game where every player remembers their previous information. -/
 def withPrev (G : Game) : Game where
   Player := G.Player
   State := List G.State
@@ -94,13 +99,8 @@ def withPrev (G : Game) : Game where
   valid := sorry
   next := sorry
   score := sorry
-  __ := G
 
 /- Exercise: given a game `G`, show that `G.withAction.withPrev` satisfies `GoodKnowledge`. -/
-
-
-/-- A game where players knows what action was taken and don't forget information -/
-class GoodInformation (G : Game) : Prop where
 
 
 /-- A game convention -/
@@ -121,7 +121,8 @@ def Applies (C : G.Convention) (I : G.Information) (A : G.Action) : Prop :=
 An action is conventional if the largest convention that applies says it is. -/
 def combine {ι : Type} [CompleteLinearOrder ι] (C : ι → Convention G) : Convention G where
   IsConventional I A :=
-    /- The relevant convention. Note that when the set over which we take the supremum is empty, `combine` still gives the right value `none`. -/
+    /- The relevant convention. Note that when the set over which we take the supremum is empty,
+    `combine` still gives the right value `none`. -/
     let i := sSup {i : ι | C i |>.Applies I A }
     C i |>.IsConventional I A
 
