@@ -1,1 +1,2 @@
-import Hanabi.Basic
+import Hanabi.Game
+import Hanabi.Hanabi
